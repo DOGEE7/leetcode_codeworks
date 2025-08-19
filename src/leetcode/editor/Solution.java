@@ -228,10 +228,10 @@ public class Solution {
     }
 
 
-    int res = 0;
+    int r = 0;
     public int diameterOfBinaryTree(TreeNode root) {
         depth(root);
-        return res;
+        return r;
 
     }
 
@@ -241,7 +241,7 @@ public class Solution {
         }else {
             int leftDepth = depth(node.left);
             int rightDepth = depth(node.right);
-            res = Math.max(res, leftDepth + rightDepth);
+            r = Math.max(r, leftDepth + rightDepth);
             return Math.max(leftDepth, rightDepth) + 1;
         }
     }
@@ -477,10 +477,422 @@ public class Solution {
         return newHead;
     }
 
+    public TreeNode sortedArrayToBST(int[] nums) {
+        return helper(nums, 0, nums.length - 1);
+
+    }
+
+    public TreeNode helper(int[] nums, int left, int right){
+        if(left > right){
+            return null;
+        }
+        if(left == right){
+            return new TreeNode(nums[left]);
+        }
+        int mid = (left + right) / 2;
+        TreeNode node = new TreeNode(nums[mid]);
+        node.left = helper(nums, 0, mid - 1);
+        node.right = helper(nums, mid + 1, right);
+        return node;
+    }
+
+    int ans;
+    int count;
+    public int kthSmallest(TreeNode root, int k) {
+        this.count = k;
+        helper(root);
+        return ans;
+
+    }
+
+    public void helper(TreeNode root){
+        if(root == null){
+            return;
+        }
+
+        helper(root.left);
+        count--;
+        ans = root.val;
+        if(count == 0){
+            return;
+        }
+
+        helper(root.right);
+        count--;
+        ans = root.val;
+        if(count == 0){
+            return;
+        }
+
+    }
+
+
+    TreeNode listNode = new TreeNode(0);
+    TreeNode dummy = listNode;
+    public void flatten(TreeNode root) {
+        dfs(root);
+        root = listNode.right;
+    }
+
+    public void dfs(TreeNode root){
+        if(root == null){
+            return;
+        }
+        dummy.right = new TreeNode(root.val);
+//        dummy.left = null;
+        dummy = dummy.right;
+        dfs(root.left);
+        dfs(root.right);
+    }
+
+
+
+    public int orangesRotting(int[][] grid) {
+        Queue<int[]> queue = new LinkedList<>();
+        int rows = grid.length, cols = grid[0].length;
+
+        // count fresh oranges and find stale ones
+        int freshCount = 0;
+        for(int i = 0; i < rows; i++){
+            for(int j = 0; j < cols; j++){
+                if(grid[i][j] == 1){
+                    freshCount++;
+                }else if(grid[i][j] == 2){
+                    queue.add(new int[]{i, j});
+                }
+            }
+        }
+
+        int minutes = 0;
+        // stale oranges infect fresh ones
+        while(freshCount > 0 && !queue.isEmpty()){
+            minutes++;
+            int r = queue.poll()[0];
+            int c = queue.poll()[1];
+            if(r - 1 >= 0 && grid[r - 1][c] == 1){
+                freshCount--;
+                grid[r - 1][c] = 2;
+                queue.add(new int[]{r - 1, c});
+            }
+
+            if(r + 1 < rows && grid[r + 1][c] == 1){
+                freshCount--;
+                grid[r + 1][c] = 2;
+                queue.add(new int[]{r + 1, c});
+            }
+
+            if(c - 1 >= 0 && grid[r][c - 1] == 1){
+                freshCount--;
+                grid[r][c - 1] = 2;
+                queue.add(new int[]{r, c - 1});
+            }
+
+            if(c + 1 < cols && grid[r][c + 1] == 1){
+                freshCount--;
+                grid[r][c + 1] = 2;
+                queue.add(new int[]{r, c + 1});
+            }
+        }
+
+        if(freshCount <= 0){
+            return minutes;
+        }
+        return -1;
+
+
+    }
+
+    public List<List<Integer>> permute(int[] nums) {
+        int len = nums.length;
+        // 使用一个动态数组保存所有可能的全排列
+        List<List<Integer>> res = new ArrayList<>();
+        if (len == 0) {
+            return res;
+        }
+
+        boolean[] used = new boolean[len];
+        List<Integer> path = new ArrayList<>();
+
+        dfs(nums, len, 0, path, used, res);
+        return res;
+    }
+
+    private void dfs(int[] nums, int len, int depth,
+                     List<Integer> path, boolean[] used,
+                     List<List<Integer>> res) {
+        if (depth == len) {
+            res.add(path);
+            return;
+        }
+
+        // 在非叶子结点处，产生不同的分支，这一操作的语义是：在还未选择的数中依次选择一个元素作为下一个位置的元素，这显然得通过一个循环实现。
+        for (int i = 0; i < len; i++) {
+            if (!used[i]) {
+                path.add(nums[i]);
+                used[i] = true;
+
+                dfs(nums, len, depth + 1, path, used, res);
+                // 注意：下面这两行代码发生 「回溯」，回溯发生在从 深层结点 回到 浅层结点 的过程，代码在形式上和递归之前是对称的
+                used[i] = false;
+                path.remove(path.size() - 1);
+            }
+        }
+    }
+
+
+    List<List<Integer>> res = new ArrayList<>();
+    List<Integer> list = new ArrayList<>();
+
+    public List<List<Integer>> combinationSum(int[] candidates, int target) {
+        if(candidates.length == 0){
+            return res;
+        }
+        dfs(candidates, 0, target);
+        return res;
+
+
+    }
+
+    public void dfs(int[] candidates, int index, int target){
+        if(index == candidates.length){
+            return;
+        }
+        if(target == 0){
+            res.add(list);
+            return;
+        }
+
+        dfs(candidates, index + 1, target);
+        if(target - candidates[index] >= 0){
+            list.add(candidates[index]);
+            dfs(candidates, index, target - candidates[index]);
+            list.remove(list.size() - 1);
+        }
+
+
+
+    }
+
+    public int largestRectangleArea(int[] heights) {
+        Deque<int[]> stack = new LinkedList<>();
+        int n = heights.length;
+        int[] left = new int[n];
+        int[] right = new int[n];
+        int res = 0;
+
+        for(int i = 0; i < n; i++ ){
+            while(!stack.isEmpty() && stack.peek()[1] > heights[i]){
+                stack.pop();
+            }
+            if(stack.isEmpty()){
+                left[i] = -1;
+            }
+            if(!stack.isEmpty() && stack.peek()[1] < heights[i]){
+                left[i] = stack.peek()[0];
+            }
+            stack.push(new int[]{i, heights[i]});
+        }
+
+        stack.clear();
+        for(int i = n - 1; i >= 0; i--){
+            while(!stack.isEmpty() && stack.peek()[1] > heights[i]){
+                stack.pop();
+            }
+            if(stack.isEmpty()){
+                left[i] = n;
+            }
+            if(!stack.isEmpty() && stack.peek()[1] < heights[i]){
+                left[i] = stack.peek()[0];
+            }
+            stack.push(new int[]{i, heights[i]});
+        }
+
+        for(int i = 0; i < n; i++){
+            res = Math.max(res, (right[i] - left[i] - 1) * heights[i]);
+        }
+
+        return res;
+
+    }
+
+    private final static Random RANDOM = new Random(System.currentTimeMillis());
+    public int findKthLargest(int[] nums, int k) {
+        int left = 0, right = nums.length - 1, target = nums.length - k;
+        while(true){
+            int index = quickSorted(nums, left, right);
+            if(index == target){
+                return nums[index];
+            }else if(index < target){
+                left = index + 1;
+            }else{
+                right = index - 1;
+            }
+        }
+    }
+
+    public int quickSorted(int[] nums, int left, int right){
+        int randonIndex = left + RANDOM.nextInt(right - left + 1);
+        swap(nums, left, randonIndex);
+        int l = left + 1, r = right;
+        int pivot = nums[left];
+        while(true){
+            while(l <= r && nums[l] <= pivot){
+                l++;
+            }
+            while(l <= r && nums[r] > pivot){
+                r--;
+            }
+            if(l > r){
+                break;
+            }
+            swap(nums, l, r);
+        }
+
+        swap(nums, r, left);
+        return r;
+    }
+
+    public void swap(int[] nums, int index1, int index2){
+        int temp = nums[index1];
+        nums[index1] = nums[index2];
+        nums[index2] = temp;
+    }
+
+    public boolean canJump(int[] nums) {
+        int maxDistance = 0;
+        int n = nums.length;
+
+        int i = 0;
+        while(i < n){
+            for(int j = 1; j <= nums[i]; j++){
+                if(i + j >= n - 1) {
+                    return true;
+                }
+                    maxDistance = Math.max(maxDistance, i + j + nums[i + j]);
+                if(maxDistance >= n - 1){
+                    return true;
+                }
+            }
+            if(i == maxDistance){
+                return false;
+            }
+            i = maxDistance;
+        }
+        return false;
+
+    }
+
+    public int jump(int[] nums) {
+        int maxDis = 0;
+        int n = nums.length;
+        int start = 0, end = 1;
+        int count = 0;
+        int i = 0;
+        while(maxDis <= n - 1){
+            for(i = start; i < end; i++){
+                maxDis = Math.max(maxDis, nums[i] + i);
+            }
+            start = end;
+            end = maxDis;
+            count++;
+        }
+
+        return count;
+    }
+
+    public List<Integer> partitionLabels(String s) {
+
+        int[] last = new int[26];
+        for(int i = 0; i < s.length(); i++){
+            last[s.charAt(i) - 'a'] = i;
+        }
+
+        int start = 0, end = 0;
+        List<Integer> res = new ArrayList<>();
+
+        for(int i = 0; i < s.length(); i++){
+            end = Math.max(end, last[s.charAt(i) - 'a']);
+            if(i == end){
+                res.add(end - start + 1);
+            }
+            start = end + 1;
+        }
+        return res;
+
+    }
+
+    public int coinChange(int[] coins, int amount) {
+        int n = coins.length;
+        int[][] dp = new int[n + 1][amount + 1];
+        for(int i = 0; i < n + 1; i++){
+            dp[i][0] = 0;
+        }
+        for(int i = 0; i < amount + 1; i++){
+            dp[0][i] = amount + 1;
+        }
+
+        for( int i = 1; i < n + 1; i++){
+            for(int j = 1; j < amount + 1; j++){
+                if(j - coins[i - 1] < 0){
+                    dp[i][j] = dp[i - 1][j];
+                    continue;
+                }
+                dp[i][j] = Math.min(dp[i - 1][j], dp[i][j - coins[i-1]] + 1);
+            }
+        }
+
+        return dp[n][amount];
+    }
+
+    public int minDistance(String word1, String word2) {
+        int n1 = word1.length(), n2 = word2.length();
+
+        int[][] dp = new int[n1 + 1][n2 + 1];
+        for(int i = 0; i < n1; i++){
+            dp[i][0] = i;
+        }
+
+        for(int j = 0; j < n2; j++ ){
+            dp[0][j] = j;
+        }
+
+        for(int i = 1; i <= n1; i++){
+            for(int j = 1; j <= n2; j++){
+                if(word1.charAt(i - 1) == word2.charAt(j - 1)){
+                    dp[i][j] = dp[i - 1][j - 1];
+                    continue;
+                }
+                dp[i][j] = Math.min(dp[i - 1][j], dp[i][j - 1]);
+                dp[i][j] = Math.min(dp[i][j], dp[i - 1][j - 1]);
+                dp[i][j]++;
+            }
+        }
+        return dp[n1][n2];
+
+    }
 
     public static void main(String[] args) {
         Solution solution = new Solution();
-        solution.swapPairs(new ListNode(1, new ListNode(2, new ListNode(3, new ListNode(4)))));
+        solution.minDistance("","a");
+//        solution.coinChange(new int[]{1, 2, 5}, 11);
+//        solution.partitionLabels("ababcbacadefegdehijhklij");
+//        solution.jump(new int[]{1,2,3});
+//        solution.canJump(new int[]{3,2,1,0,4});
+//        System.out.println(solution.findKthLargest(new int[]{3,2,2,2,2}, 2));
+//        solution.largestRectangleArea(new int[]{2,1,5,6,2,3});
+//        solution.combinationSum(new int[]{2, 3, 5}, 8);
+//        System.out.println(solution.permute(new int[]{1, 2, 3}));
+//        Trie node = new Trie();
+//        node.insert("apple");
+//        node.search("apple");
+//        System.out.println(solution.orangesRotting(new int[][]{
+//                {2,1,1},
+//                {1,1,0},
+//                {0,1,1}
+//        }));
+//        solution.flatten(new TreeNode(1, new TreeNode(2, new TreeNode(3), new TreeNode(4)), new TreeNode(5, null , new TreeNode(6))));
+//        solution.sortedArrayToBST(new int[]{-10, -3, 0, 5, 9});
+//        solution.swapPairs(new ListNode(1, new ListNode(2, new ListNode(3, new ListNode(4)))));
 //        System.out.println(solution.spiralOrder(new int[][]{
 //                {1, 2, 3,4},
 //                {5, 6, 7,8},
@@ -505,8 +917,48 @@ public class Solution {
         Deque<Integer> deque1 = new ArrayDeque<>();
         List<int[]> list = new ArrayList<>();
         list.isEmpty();
+        list.remove(0);
+
         Map<Integer, Integer> map = new LinkedHashMap<>();
         Map<Integer, Integer> map1 = new HashMap<>();
+        Map<Integer, Integer> treeMap = new TreeMap<>();
+        Set<Integer> set = new TreeSet<>();
+        Iterator iterator = set.iterator();
+        String s = new String();
+        s.toCharArray();
+        StringBuilder sb = new StringBuilder("");
+        sb.deleteCharAt(sb.length() - 1);
+        sb.append("");
+        sb.replace(0,1,"1");
+        String string = "12";
+        int nu = Integer.parseInt(string);
+        String str = "123";
+        int i = Integer.valueOf('c');
+        Deque<int[]> stack = new LinkedList<>();
+        stack.push(new int[]{1, 2});
+        stack.clear();
+        PriorityQueue<Integer> heap = new PriorityQueue<>(1, (a,b)->b - a);
+        heap.offer(2);
+        heap.toArray();
+        heap.size();
+        heap.poll();
+        heap.peek();
+        map1.keySet();
+
+        Scanner in = new Scanner(System.in);
+        in.hasNextInt();
+
+        sb.append(1);
+        sb.append('1');
+        String.valueOf(s.charAt(0)).toUpperCase();
+        sb.insert(0,"1");
+
+        int n = Integer.valueOf("10");
+        int[] arr = new int[4];
+        arr = new int[]{n, n, n, n};
+        List<Integer> list1 = new ArrayList<>();
+
+
 
 
     }
@@ -516,3 +968,53 @@ public class Solution {
 }
 //leetcode submit region end(Prohibit modification and deletion)
 
+class Trie {
+    private Trie[] children;
+    private boolean isEnd;
+
+    public Trie() {
+        children = new Trie[26];
+        isEnd = false;
+
+    }
+
+    public void insert(String word) {
+        Trie node = this;
+        for(int i = 0; i < word.length(); i++){
+            int index = word.charAt(i) - 'a';
+            if(node.children[index] == null){
+                node.children[index] = new Trie();
+            }
+            node = node.children[index];
+        }
+        node.isEnd = true;
+
+    }
+
+    public boolean search(String word) {
+        Trie node = this;
+        for(int i = 0; i < word.length(); i++){
+            int index = word.charAt(i) - 'a';
+            if(node.children[index] == null){
+                return false;
+            }
+            node = node.children[index];
+        }
+        return node.isEnd;
+    }
+
+    public boolean startsWith(String prefix) {
+        Trie node = this;
+        for(int i = 0; i < prefix.length(); i++){
+            int index = prefix.charAt(i) - 'a';
+            if(node.children[index] == null){
+                return false;
+            }
+            node = node.children[index];
+        }
+        return true;
+
+    }
+
+
+}
